@@ -21,26 +21,47 @@ let curr_track = document.createElement('audio');
 
 // Define the tracks that have to be played
 let track_list = [
-  {
-    name: "Night Owl",
-    artist: "Broke For Free",
-    image: "https://images.pexels.com/photos/2264753/pexels-photo-2264753.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=250&w=250",
-    path: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/WFMU/Broke_For_Free/Directionless_EP/Broke_For_Free_-_01_-_Night_Owl.mp3"
-  },
-  {
-    name: "Enthusiast",
-    artist: "Tours",
-    image: "https://images.pexels.com/photos/3100835/pexels-photo-3100835.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=250&w=250",
-    path: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3"
-  },
-  {
-    name: "Shipping Lanes",
-    artist: "Chad Crouch",
-    image: "https://images.pexels.com/photos/1717969/pexels-photo-1717969.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=250&w=250",
-    path: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Arps/Chad_Crouch_-_Shipping_Lanes.mp3",
-  },
 ];
 
+/* Settings */
+const RESERVOIR_API_KEY = "f2d01b7c-9fc6-5163-8d23-ed48ee686881";
+/* End Settings */
+
+const url = 'https://mainnet.infura.io/v3/825eb55e016f48f49606e46f7b03b481'
+const provider = new ethers.providers.JsonRpcProvider(url);
+
+const address = "0x4abb0f6b101aecbc90c935e374c10f8c7f0d1f36"
+
+const options = {
+  method: 'GET',
+  url: `https://api.reservoir.tools/users/${address}/tokens/v5`,
+  params: {
+    collection: '0xa1d6b61c7a8552841c4974850af01cca12a332d3',
+    sortBy: 'acquiredAt',
+    sortDirection: 'desc',
+    offset: '0',
+    limit: '100',
+    includeTopBid: 'false'
+  },
+  headers: {accept: '*/*', 'x-api-key': RESERVOIR_API_KEY}
+};
+axios
+  .request(options)
+  .then(function (response) {
+    response.data.tokens.forEach((token) => {
+      console.log(token)
+      track_list.push(
+        {
+          name: `${token.token.name}`,
+          artist: `${token.token.collection.name}`,
+          image: `${token.token.image}`,
+          path: `https://arweave.net/UbhGu-o87iwB-BSclPDCDjMH-edjQyi3_webRk9Qqns  `
+        }
+      )
+    })
+    loadTrack(track_index);
+  })
+  .catch((error) => { console.log( error ) });
 function random_bg_color() {
 
   // Get a number between 64 to 256 (for getting lighter colors)
@@ -78,7 +99,6 @@ function resetValues() {
 }
 
 // Load the first track in the tracklist
-loadTrack(track_index);
 
 function playpauseTrack() {
   if (!isPlaying) playTrack();
